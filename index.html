@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Mockup de una app para descubrir y reservar barberías y salones cercanos." />
+    <title>Turno — Encuentra tu próximo look</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root { --ink:#10231f; --forest:#0e3a30; --lime:#d9ff59; --cream:#f7f7f1; --muted:#66736e; --line:#dbe2da; --coral:#ff6a52; }
+      * { box-sizing:border-box; } html { scroll-behavior:smooth; }
+      body { margin:0; color:var(--ink); background:var(--cream); font-family:Manrope,Arial,sans-serif; }
+      .wrap { width:min(1180px, calc(100% - 40px)); margin:auto; }
+      nav { height:84px; display:flex; align-items:center; justify-content:space-between; }
+      .brand { font-weight:800; letter-spacing:-1.4px; font-size:1.55rem; text-decoration:none; color:var(--ink); }
+      .brand i { display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--coral); margin-left:3px; }
+      .nav-links { display:flex; gap:28px; align-items:center; font-size:.88rem; font-weight:700; }
+      .nav-links a { text-decoration:none; color:var(--ink); }
+      .button { padding:13px 19px; border-radius:9px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; font-size:.88rem; font-weight:800; border:1px solid var(--ink); transition:.2s; }
+      .button.dark { color:white; background:var(--ink); } .button.lime { color:var(--ink); background:var(--lime); border-color:var(--lime); }
+      .button:hover { transform:translateY(-2px); box-shadow:4px 5px 0 var(--ink); }
+      .hero { display:grid; grid-template-columns:1.03fr .97fr; align-items:center; gap:52px; padding:65px 0 92px; }
+      .eyebrow { display:inline-flex; gap:8px; align-items:center; font:500 .73rem 'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--forest); }
+      .eyebrow:before { content:""; height:8px; width:8px; border-radius:50%; background:var(--coral); }
+      h1 { font-size:clamp(3rem,5.8vw,5.45rem); line-height:.98; letter-spacing:-.075em; margin:18px 0 24px; max-width:640px; }
+      .lead { color:var(--muted); font-size:1.08rem; line-height:1.65; max-width:540px; margin:0 0 30px; }
+      .cta-row { display:flex; gap:12px; flex-wrap:wrap; }
+      .note { margin-top:24px; font-size:.76rem; color:var(--muted); font-weight:600; }
+      .phone { background:var(--forest); border-radius:30px; padding:14px; max-width:355px; margin-left:auto; box-shadow:15px 17px 0 var(--lime); transform:rotate(3deg); }
+      .screen { background:#fff; border-radius:21px; padding:19px; overflow:hidden; }
+      .mobile-top { display:flex; justify-content:space-between; font:500 .72rem 'DM Mono'; margin:2px 1px 22px; }
+      .screen h3 { font-size:1.35rem; letter-spacing:-.05em; margin:0 0 5px; }.screen p { font-size:.76rem; color:var(--muted); margin:0 0 16px; }
+      .location { width:100%; border:0; text-align:left; background:#f1f4ef; border-radius:9px; padding:11px; font:700 .75rem Manrope,Arial,sans-serif; color:var(--ink); cursor:pointer; margin-bottom:17px; }.location:hover { background:#e5eadf; }
+      .card { display:flex; gap:11px; border:1px solid var(--line); border-radius:12px; padding:9px; margin:10px 0; align-items:center; }.card img { width:58px; height:58px; object-fit:cover; border-radius:8px; }.card strong { display:block; font-size:.78rem; }.card span { font-size:.66rem; color:var(--muted); }.rating { color:#c07200!important; font-weight:800; margin-top:4px; display:block; }.travel { color:var(--forest)!important; font-weight:800; }
+      .proof { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:25px 0; }.proof .wrap { display:flex; justify-content:space-between; gap:18px; align-items:center; }.proof strong { font-size:1.45rem; letter-spacing:-.06em; }.proof span { font:500 .68rem 'DM Mono'; color:var(--muted); text-transform:uppercase; }
+      .how { padding:100px 0; }.section-label { color:var(--coral); font:500 .75rem 'DM Mono'; text-transform:uppercase; letter-spacing:.08em; }.how h2,.partners h2 { font-size:clamp(2rem,4vw,3.5rem); letter-spacing:-.065em; line-height:1.05; margin:14px 0 44px; max-width:650px; }
+      .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }.step { background:#fff; padding:28px; min-height:220px; border-radius:14px; }.number { font:500 .78rem 'DM Mono'; color:var(--coral); }.step h3 { letter-spacing:-.04em; margin:42px 0 8px; }.step p { font-size:.85rem; line-height:1.55; color:var(--muted); margin:0; }
+      .partners { background:var(--ink); color:white; padding:86px 0; }.partners h2 { margin-bottom:23px; }.partners p { color:#c9d2cd; max-width:540px; line-height:1.65; }.commission { margin-top:30px; display:flex; align-items:center; gap:15px; }.commission b { color:var(--lime); font-size:3.5rem; letter-spacing:-.09em; }.commission span { font-size:.82rem; color:#c9d2cd; max-width:200px; }.footer-cta { margin-top:36px; }
+      footer { padding:25px 0; font-size:.74rem; color:var(--muted); display:flex; justify-content:space-between; }
+      @media(max-width:720px) { .nav-links a:not(.button) { display:none; } nav { height:72px; }.hero { grid-template-columns:1fr; gap:42px; padding:42px 0 70px; }.phone { margin:auto; transform:none; }.proof .wrap { flex-wrap:wrap; }.steps { grid-template-columns:1fr; }.how { padding:70px 0; }.proof strong { font-size:1.15rem; } footer { gap:10px; flex-direction:column; } }
+    </style>
+  </head>
+  <body>
+    <header class="wrap">
+      <nav>
+        <a class="brand" href="#inicio">turno<i></i></a>
+        <div class="nav-links"><a href="#como-funciona">Cómo funciona</a><a href="#negocios">Para negocios</a><a class="button dark" href="#demo">Ver demo</a></div>
+      </nav>
+    </header>
+    <main id="inicio">
+      <section class="hero wrap">
+        <div>
+          <span class="eyebrow">Tu mejor versión está cerca</span>
+          <h1>Tu próximo look empieza con un buen turno.</h1>
+          <p class="lead">Descubre peluqueros, barberías y salones cerca de ti. Compara precios, horarios y reseñas; reserva en pocos toques.</p>
+          <div class="cta-row"><a class="button dark" href="#demo">Explorar lugares</a><a class="button" href="#negocios">Tengo un negocio</a></div>
+          <p class="note">Mockup conceptual · Disponible próximamente</p>
+        </div>
+        <div class="phone" aria-label="Vista previa de la aplicación Turno">
+          <div class="screen"><div class="mobile-top"><span>9:41</span><span>● ● ●</span></div><h3>Hola, Joseph</h3><p>Encuentra un lugar para hoy.</p><button class="location" id="locationButton" type="button">⌖ Compartir mi ubicación para ver tiempos</button>
+            <div class="card" data-lat="19.4303" data-lng="-99.1398"><img alt="Barbería de ejemplo" src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=160&q=80"><div><strong>Distrito Barber</strong><span>Corte clásico · Desde $250</span><span class="rating">★ 4.9 · 128 reseñas</span><span class="travel">⌖ Activa tu ubicación</span></div></div>
+            <div class="card" data-lat="19.4256" data-lng="-99.1462"><img alt="Salón de ejemplo" src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=160&q=80"><div><strong>Estudio Alma</strong><span>Color y styling · Desde $400</span><span class="rating">★ 4.8 · 86 reseñas</span><span class="travel">⌖ Activa tu ubicación</span></div></div>
+          </div>
+        </div>
+      </section>
+      <section class="proof"><div class="wrap"><span>Una experiencia simple para todos</span><strong>Encuentra. Elige. Reserva.</strong><span>Sin llamadas ni esperas</span></div></section>
+      <section class="how wrap" id="como-funciona"><span class="section-label">Así de fácil</span><h2>Más visibilidad para el talento local.</h2><div class="steps"><article class="step"><span class="number">01 / DESCUBRE</span><h3>Lo mejor cerca de ti</h3><p>Ve opciones ordenadas por ubicación, especialidad y disponibilidad.</p></article><article class="step"><span class="number">02 / COMPARA</span><h3>Decide con confianza</h3><p>Consulta precios, perfiles, horarios y opiniones de clientes reales.</p></article><article class="step"><span class="number">03 / RESERVA</span><h3>Confirma tu turno</h3><p>Elige a tu profesional, un horario y recibe confirmación al instante.</p></article></div></section>
+      <section class="partners" id="negocios"><div class="wrap"><span class="section-label">Para barberías y salones</span><h2>Haz que más personas encuentren tu silla.</h2><p>Turno conecta a negocios con clientes cercanos que ya buscan un servicio. Crea tu perfil, muestra tu trabajo y recibe reservas sin complicaciones.</p><div class="commission"><b>5%</b><span>de comisión por cada cita completada.</span></div><div class="footer-cta"><a class="button lime" href="#demo">Quiero aparecer en Turno</a></div></div></section>
+    </main>
+    <footer class="wrap"><span>© 2026 Turno · Mockup para Joseph Zeitoune</span><span>Encuentra tu estilo, a tu manera.</span></footer>
+    <script>
+      const locationButton = document.getElementById('locationButton');
+      const earthRadius = 6371;
+      const radians = degree => degree * Math.PI / 180;
+      function distanceBetween(lat1, lng1, lat2, lng2) {
+        const deltaLat = radians(lat2 - lat1), deltaLng = radians(lng2 - lng1);
+        const a = Math.sin(deltaLat / 2) ** 2 + Math.cos(radians(lat1)) * Math.cos(radians(lat2)) * Math.sin(deltaLng / 2) ** 2;
+        return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+      locationButton.addEventListener('click', () => {
+        if (!navigator.geolocation) { locationButton.textContent = 'La ubicación no está disponible en este navegador'; return; }
+        locationButton.textContent = '⌖ Obteniendo tu ubicación…';
+        navigator.geolocation.getCurrentPosition(({ coords }) => {
+          document.querySelectorAll('.card').forEach(card => {
+            const km = distanceBetween(coords.latitude, coords.longitude, Number(card.dataset.lat), Number(card.dataset.lng));
+            card.querySelector('.travel').textContent = `⌖ A ${km.toFixed(1)} km de ti`;
+          });
+          locationButton.textContent = '⌖ Ubicación compartida · Actualizar tiempos';
+        }, () => { locationButton.textContent = 'No pudimos acceder a tu ubicación. Inténtalo de nuevo.'; }, { enableHighAccuracy: true, timeout: 10000 });
+      });
+    </script>
+  </body>
+</html>
