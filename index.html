@@ -54,6 +54,14 @@
       :focus-visible { outline:3px solid var(--coral); outline-offset:4px; }
       #bookingResult { line-height:1.6; font-size:.9rem; }
       @media(max-width:720px) { .demo-grid { grid-template-columns:1fr; }.demo { padding:60px 0; }.menu-panel,.booking { padding:20px; } }
+    
+      .button { color:var(--ink); } button:disabled { opacity:.65; cursor:wait; }
+      #nearbySearch { display:block; width:100%; max-width:600px; padding:14px; margin:10px 0 20px; border:1px solid var(--line); border-radius:9px; font:inherit; }
+      #cerca label { display:block; margin-top:24px; font-weight:700; font-size:.9rem; }
+      .nearby-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:18px; }
+      .nearby-card { padding:22px; background:white; border:1px solid var(--line); border-radius:14px; overflow-wrap:anywhere; }
+      .nearby-card h3 { margin:0 0 12px; }.nearby-card p { font-size:.85rem; color:var(--muted); line-height:1.5; }
+      .nearby-card .cta-row { margin-top:18px; }.nearby-card .button { font-size:.76rem; padding:10px; }
     </style>
   </head>
   <body>
@@ -69,8 +77,8 @@
           <span class="eyebrow">Tu próximo antojo está cerca</span>
           <h1>Tu próxima comida empieza con una buena mesa.</h1>
           <p class="lead">Descubre restaurantes cerca de ti. Explora menús, compara precios y encuentra una mesa para compartir.</p>
-          <div class="cta-row"><a class="button dark" href="#demo">Explorar restaurantes</a><a class="button" href="#negocios">Tengo un negocio</a></div>
-          <p class="note">Prototipo interactivo · Restaurantes y precios de ejemplo</p>
+          <div class="cta-row"><a class="button dark" href="#cerca">Explorar restaurantes</a><a class="button" href="#negocios">Tengo un negocio</a></div>
+          <p class="note">Prototipo interactivo · Reservas simuladas</p>
         </div>
         <div class="phone" aria-label="Vista previa de la aplicación Turno">
           <div class="screen"><div class="mobile-top"><span>9:41</span><span>● ● ●</span></div><h3>Hola, Joseph</h3><p>¿Qué se te antoja hoy?</p><a class="location" style="display:block;text-decoration:none" href="#demo">Ver menú y probar una reserva →</a>
@@ -81,19 +89,17 @@
       </section>
       <section class="proof"><div class="wrap"><span>Una experiencia simple para todos</span><strong>Encuentra. Elige. Reserva.</strong><span>Tu mesa, en pocos pasos</span></div></section>
       <section class="how wrap" id="como-funciona"><span class="section-label">Así de fácil</span><h2>Del antojo a la mesa, en tres pasos.</h2><div class="steps"><article class="step"><span class="number">01 / DESCUBRE</span><h3>Lo mejor cerca de ti</h3><p>Descubre restaurantes por zona y tipo de cocina. Encuentra una opción para cada ocasión.</p></article><article class="step"><span class="number">02 / COMPARA</span><h3>Decide con confianza</h3><p>Explora el menú y los precios por persona antes de elegir dónde comer.</p></article><article class="step"><span class="number">03 / RESERVA</span><h3>Elige tu mesa</h3><p>Selecciona restaurante, fecha, hora y número de personas. Prueba el proceso en nuestra demo.</p></article></div></section>
+      <section class="demo wrap" id="cerca" aria-labelledby="nearbyTitle"><span class="section-label">Descubre cerca de ti</span><h2 id="nearbyTitle">¿Dónde comemos hoy?</h2><p class="lead">Busca restaurantes cercanos en Google Maps. Luego escribe su nombre en la demo de reserva.</p><div class="cta-row"><button class="button" type="button" disabled>Compartir ubicación · Próximamente</button><a class="button dark" href="https://www.google.com/maps/search/restaurantes+cerca+de+mi/" target="_blank" rel="noopener noreferrer">Ver restaurantes cerca en Google Maps ↗</a></div><p class="note">La búsqueda por ubicación dentro de Turno todavía no está activada. Google Maps se abre en otra pestaña.</p></section>
       <section class="demo wrap" id="demo" aria-labelledby="demoTitle">
         <span class="section-label">Pruébalo aquí</span><h2 id="demoTitle">Una mesa para tu próximo plan.</h2>
         <p class="lead">Explora estos menús ficticios y simula una reserva. No se envían datos ni se reserva una mesa real.</p>
         <div class="demo-grid">
-          <div class="menu-panel"><h3>Un vistazo al menú</h3><p class="note">Precios ilustrativos en pesos mexicanos.</p>
-            <h4>Casa Brasa · Cocina mexicana</h4><ul><li><span>Tacos de setas (3 piezas)</span><strong>$140</strong></li><li><span>Pollo a la brasa</span><strong>$220</strong></li><li><span>Agua de jamaica</span><strong>$45</strong></li></ul>
-            <h4>Mesa Alma · Cocina italiana</h4><ul><li><span>Pizza margarita</span><strong>$210</strong></li><li><span>Pasta al pesto</span><strong>$190</strong></li><li><span>Tiramisú</span><strong>$95</strong></li></ul>
-          </div>
+          <div class="menu-panel" id="selectedMenu" aria-live="polite"></div>
           <form class="booking" id="bookingForm">
-            <label for="restaurant">Restaurante</label><input id="restaurant" name="restaurant" type="text" list="restaurantOptions" placeholder="Escribe el nombre del restaurante" maxlength="120" autocomplete="off" required><datalist id="restaurantOptions"><option value="Casa Brasa"></option><option value="Mesa Alma"></option></datalist>
+            <label for="restaurant">Restaurante</label><input id="restaurant" name="restaurant" type="text" list="restaurantOptions" placeholder="Escribe el nombre del restaurante" value="Casa Brasa" maxlength="120" autocomplete="off" required><datalist id="restaurantOptions"><option value="Casa Brasa"></option><option value="Mesa Alma"></option></datalist>
             <div class="form-row"><div><label for="date">Fecha</label><input id="date" name="date" type="date" required></div><div><label for="time">Hora</label><select id="time" name="time" required><option value="13:00">13:00</option><option value="14:00">14:00</option><option value="15:00">15:00</option><option value="18:00">18:00</option><option value="19:00">19:00</option><option value="20:00">20:00</option><option value="21:00">21:00</option></select></div></div>
             <label for="guests">Número de personas</label><input id="guests" name="guests" type="number" min="1" step="1" value="2" inputmode="numeric" aria-describedby="guestsHelp" required><p id="guestsHelp" class="note" style="margin-top:-8px;margin-bottom:20px">Escribe el tamaño de tu grupo, también si son más de 6 personas.</p>
-            <button class="button dark" type="submit">Simular reserva</button><p class="note">Horarios de ejemplo; no representan disponibilidad real.</p>
+            <fieldset style="border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 20px"><legend>Garantía de reserva · Demo</legend><p id="cancellationPolicy" style="font-size:.85rem;line-height:1.6"></p><label for="testCard">Tarjeta de garantía</label><select id="testCard" required><option value="">Selecciona una tarjeta de prueba</option><option value="demo">Tarjeta ficticia · termina en 4242</option></select><p class="note">No ingreses datos de una tarjeta real. Esta demo no guarda tarjetas ni realiza cargos.</p><label style="display:flex;gap:10px;align-items:flex-start"><input id="acceptPolicy" type="checkbox" required style="width:18px;flex:0 0 18px;margin:0"><span id="policyLabel">Acepto la política de inasistencia de prueba.</span></label></fieldset><button class="button dark" id="reserveButton" type="submit">Simular reserva</button><p class="note">Horarios de ejemplo; no representan disponibilidad real.</p>
             <p id="bookingResult" role="status" aria-live="polite" tabindex="-1"></p>
           </form>
         </div>
@@ -116,6 +122,7 @@
       });
       form.addEventListener('submit', event => {
         event.preventDefault();
+        if (!currentRestaurant) { result.textContent = 'Este restaurante no tiene menú ni política registrados. Elige Casa Brasa o Mesa Alma para probar la reserva.'; return; }
         dateInput.min = todayLocal();
         const selected = new Date(dateInput.value + 'T' + form.elements.time.value);
         if (!Number.isFinite(selected.getTime()) || selected <= new Date()) {
@@ -125,9 +132,43 @@
         }
         dateInput.setCustomValidity('');
         const date = selected.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
-        result.textContent = 'Simulación lista: ' + form.elements.restaurant.value + ', ' + date + ' a las ' + form.elements.time.value + ', para ' + form.elements.guests.value + (form.elements.guests.value === '1' ? ' persona.' : ' personas.') + ' Esta prueba no genera una reserva real.';
+        result.textContent = 'Simulación lista: ' + form.elements.restaurant.value + ', ' + date + ' a las ' + form.elements.time.value + ', para ' + form.elements.guests.value + (form.elements.guests.value === '1' ? ' persona.' : ' personas.') + ' Garantía ficticia: $' + currentRestaurant.noShow + ' MXN por reserva si no asistes. Esta prueba no genera una reserva real ni realiza cargos.';
         result.focus();
       });
+
+      const restaurantInput = document.getElementById('restaurant');
+      restaurantInput.addEventListener('input', () => restaurantInput.setCustomValidity(''));
+      form.addEventListener('submit', event => {
+        if (!restaurantInput.value.trim()) {
+          event.preventDefault();
+          result.textContent = '';
+          restaurantInput.setCustomValidity('Escribe el nombre del restaurante.');
+          restaurantInput.reportValidity();
+        }
+      });
+      const normalize = text => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const demoRestaurants = {
+        'casa brasa': {name:'Casa Brasa',noShow:150,items:[['Tacos de setas (3 piezas)',140],['Pollo a la brasa',220],['Agua de jamaica',45]]},
+        'mesa alma': {name:'Mesa Alma',noShow:200,items:[['Pizza margarita',210],['Pasta al pesto',190],['Tiramisú',95]]}
+      };
+      let currentRestaurant = null;
+      function updateRestaurant() {
+        currentRestaurant = demoRestaurants[normalize(restaurantInput.value.trim())] || null;
+        const panel = document.getElementById('selectedMenu'); panel.replaceChildren();
+        const heading = document.createElement('h3'); heading.textContent = currentRestaurant ? 'Menú · ' + currentRestaurant.name : 'Menú no disponible';
+        const info = document.createElement('p'); info.className = 'note'; info.textContent = currentRestaurant ? 'Restaurante ficticio · Precios de ejemplo en MXN.' : 'Este restaurante aún no tiene menú ni política de inasistencia registrados en Turno. Prueba con Casa Brasa o Mesa Alma. Aparecer en la búsqueda cercana no implica afiliación.';
+        panel.append(heading,info);
+        if(currentRestaurant) {
+          const list = document.createElement('ul');
+          currentRestaurant.items.forEach(([name,price]) => { const li=document.createElement('li'),label=document.createElement('span'),cost=document.createElement('strong'); label.textContent=name;cost.textContent='$'+price;li.append(label,cost);list.append(li); });panel.append(list);
+        }
+        document.getElementById('cancellationPolicy').textContent = currentRestaurant ? 'Política de ejemplo: $' + currentRestaurant.noShow + ' MXN por reserva si no te presentas, sin importar el número de personas. Cancelación sin cargo hasta 24 horas antes. No se cobra nada en esta demo.' : 'Política pendiente: no se puede confirmar una reserva con garantía.';
+        document.getElementById('policyLabel').textContent = currentRestaurant ? 'Acepto la política de prueba de ' + currentRestaurant.name + ': $' + currentRestaurant.noShow + ' MXN por inasistencia.' : 'Política pendiente.';
+        document.getElementById('acceptPolicy').checked=false;document.getElementById('acceptPolicy').disabled=!currentRestaurant;
+        document.getElementById('testCard').value='';document.getElementById('testCard').disabled=!currentRestaurant;
+        document.getElementById('reserveButton').disabled=!currentRestaurant;result.textContent='';
+      }
+      restaurantInput.addEventListener('input',updateRestaurant);updateRestaurant();
     </script>
   </body>
 </html>
