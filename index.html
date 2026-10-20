@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Mockup de una app para descubrir y reservar barberías y salones cercanos." />
-    <title>Turno — Encuentra tu próximo look</title>
+    <meta name="description" content="Descubre restaurantes, explora sus menús y prueba cómo reservar una mesa con Turno." />
+    <title>Turno — Tu próxima mesa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
-      :root { --ink:#10231f; --forest:#0e3a30; --lime:#d9ff59; --cream:#f7f7f1; --muted:#66736e; --line:#dbe2da; --coral:#ff6a52; }
+      :root { --ink:#30251f; --forest:#6c3828; --lime:#f6ce78; --cream:#fffaf2; --muted:#776b61; --line:#e8ddd0; --coral:#ba4b2d; }
       * { box-sizing:border-box; } html { scroll-behavior:smooth; }
       body { margin:0; color:var(--ink); background:var(--cream); font-family:Manrope,Arial,sans-serif; }
       .wrap { width:min(1180px, calc(100% - 40px)); margin:auto; }
@@ -40,6 +40,20 @@
       .partners { background:var(--ink); color:white; padding:86px 0; }.partners h2 { margin-bottom:23px; }.partners p { color:#c9d2cd; max-width:540px; line-height:1.65; }.commission { margin-top:30px; display:flex; align-items:center; gap:15px; }.commission b { color:var(--lime); font-size:3.5rem; letter-spacing:-.09em; }.commission span { font-size:.82rem; color:#c9d2cd; max-width:200px; }.footer-cta { margin-top:36px; }
       footer { padding:25px 0; font-size:.74rem; color:var(--muted); display:flex; justify-content:space-between; }
       @media(max-width:720px) { .nav-links a:not(.button) { display:none; } nav { height:72px; }.hero { grid-template-columns:1fr; gap:42px; padding:42px 0 70px; }.phone { margin:auto; transform:none; }.proof .wrap { flex-wrap:wrap; }.steps { grid-template-columns:1fr; }.how { padding:70px 0; }.proof strong { font-size:1.15rem; } footer { gap:10px; flex-direction:column; } }
+    
+      .demo { padding:80px 0; scroll-margin-top:20px; }
+      .demo h2 { font-size:clamp(2rem,4vw,3rem); letter-spacing:-.06em; margin:14px 0; }
+      .demo-grid { display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-top:28px; }
+      .menu-panel,.booking { background:white; border:1px solid var(--line); border-radius:16px; padding:28px; }
+      .menu-panel h3 { margin-top:0; } .menu-panel ul { padding:0; list-style:none; }
+      .menu-panel li { display:flex; justify-content:space-between; gap:20px; padding:13px 0; border-bottom:1px solid var(--line); font-size:.9rem; }
+      .booking label { display:block; font-size:.85rem; font-weight:700; margin-bottom:6px; }
+      .booking input,.booking select { width:100%; min-width:0; padding:12px; border:1px solid var(--line); border-radius:8px; background:white; color:var(--ink); font:inherit; margin-bottom:18px; }
+      .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+      button.button { cursor:pointer; font-family:inherit; } .booking .button { width:100%; }
+      :focus-visible { outline:3px solid var(--coral); outline-offset:4px; }
+      #bookingResult { line-height:1.6; font-size:.9rem; }
+      @media(max-width:720px) { .demo-grid { grid-template-columns:1fr; }.demo { padding:60px 0; }.menu-panel,.booking { padding:20px; } }
     </style>
   </head>
   <body>
@@ -52,43 +66,67 @@
     <main id="inicio">
       <section class="hero wrap">
         <div>
-          <span class="eyebrow">Tu mejor versión está cerca</span>
-          <h1>Tu próximo look empieza con un buen turno.</h1>
-          <p class="lead">Descubre peluqueros, barberías y salones cerca de ti. Compara precios, horarios y reseñas; reserva en pocos toques.</p>
-          <div class="cta-row"><a class="button dark" href="#demo">Explorar lugares</a><a class="button" href="#negocios">Tengo un negocio</a></div>
-          <p class="note">Mockup conceptual · Disponible próximamente</p>
+          <span class="eyebrow">Tu próximo antojo está cerca</span>
+          <h1>Tu próxima comida empieza con una buena mesa.</h1>
+          <p class="lead">Descubre restaurantes cerca de ti. Explora menús, compara precios y encuentra una mesa para compartir.</p>
+          <div class="cta-row"><a class="button dark" href="#demo">Explorar restaurantes</a><a class="button" href="#negocios">Tengo un negocio</a></div>
+          <p class="note">Prototipo interactivo · Restaurantes y precios de ejemplo</p>
         </div>
         <div class="phone" aria-label="Vista previa de la aplicación Turno">
-          <div class="screen"><div class="mobile-top"><span>9:41</span><span>● ● ●</span></div><h3>Hola, Joseph</h3><p>Encuentra un lugar para hoy.</p><button class="location" id="locationButton" type="button">⌖ Compartir mi ubicación para ver tiempos</button>
-            <div class="card" data-lat="19.4303" data-lng="-99.1398"><img alt="Barbería de ejemplo" src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=160&q=80"><div><strong>Distrito Barber</strong><span>Corte clásico · Desde $250</span><span class="rating">★ 4.9 · 128 reseñas</span><span class="travel">⌖ Activa tu ubicación</span></div></div>
-            <div class="card" data-lat="19.4256" data-lng="-99.1462"><img alt="Salón de ejemplo" src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=160&q=80"><div><strong>Estudio Alma</strong><span>Color y styling · Desde $400</span><span class="rating">★ 4.8 · 86 reseñas</span><span class="travel">⌖ Activa tu ubicación</span></div></div>
+          <div class="screen"><div class="mobile-top"><span>9:41</span><span>● ● ●</span></div><h3>Hola, Joseph</h3><p>¿Qué se te antoja hoy?</p><a class="location" style="display:block;text-decoration:none" href="#demo">Ver menú y probar una reserva →</a>
+            <div class="card"><img alt="Platillo de ejemplo para Casa Brasa" src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=160&q=80"><div><strong>Casa Brasa</strong><span>Mexicana · Aprox. $250 por persona</span><span class="rating">Menú de ejemplo · MXN</span><span class="travel">Restaurante ficticio</span></div></div>
+            <div class="card"><img alt="Pizza de ejemplo para Mesa Alma" src="https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&w=160&q=80"><div><strong>Mesa Alma</strong><span>Italiana · Aprox. $300 por persona</span><span class="rating">Menú de ejemplo · MXN</span><span class="travel">Restaurante ficticio</span></div></div>
           </div>
         </div>
       </section>
-      <section class="proof"><div class="wrap"><span>Una experiencia simple para todos</span><strong>Encuentra. Elige. Reserva.</strong><span>Sin llamadas ni esperas</span></div></section>
-      <section class="how wrap" id="como-funciona"><span class="section-label">Así de fácil</span><h2>Más visibilidad para el talento local.</h2><div class="steps"><article class="step"><span class="number">01 / DESCUBRE</span><h3>Lo mejor cerca de ti</h3><p>Ve opciones ordenadas por ubicación, especialidad y disponibilidad.</p></article><article class="step"><span class="number">02 / COMPARA</span><h3>Decide con confianza</h3><p>Consulta precios, perfiles, horarios y opiniones de clientes reales.</p></article><article class="step"><span class="number">03 / RESERVA</span><h3>Confirma tu turno</h3><p>Elige a tu profesional, un horario y recibe confirmación al instante.</p></article></div></section>
-      <section class="partners" id="negocios"><div class="wrap"><span class="section-label">Para barberías y salones</span><h2>Haz que más personas encuentren tu silla.</h2><p>Turno conecta a negocios con clientes cercanos que ya buscan un servicio. Crea tu perfil, muestra tu trabajo y recibe reservas sin complicaciones.</p><div class="commission"><b>5%</b><span>de comisión por cada cita completada.</span></div><div class="footer-cta"><a class="button lime" href="#demo">Quiero aparecer en Turno</a></div></div></section>
+      <section class="proof"><div class="wrap"><span>Una experiencia simple para todos</span><strong>Encuentra. Elige. Reserva.</strong><span>Tu mesa, en pocos pasos</span></div></section>
+      <section class="how wrap" id="como-funciona"><span class="section-label">Así de fácil</span><h2>Del antojo a la mesa, en tres pasos.</h2><div class="steps"><article class="step"><span class="number">01 / DESCUBRE</span><h3>Lo mejor cerca de ti</h3><p>Descubre restaurantes por zona y tipo de cocina. Encuentra una opción para cada ocasión.</p></article><article class="step"><span class="number">02 / COMPARA</span><h3>Decide con confianza</h3><p>Explora el menú y los precios por persona antes de elegir dónde comer.</p></article><article class="step"><span class="number">03 / RESERVA</span><h3>Elige tu mesa</h3><p>Selecciona restaurante, fecha, hora y número de personas. Prueba el proceso en nuestra demo.</p></article></div></section>
+      <section class="demo wrap" id="demo" aria-labelledby="demoTitle">
+        <span class="section-label">Pruébalo aquí</span><h2 id="demoTitle">Una mesa para tu próximo plan.</h2>
+        <p class="lead">Explora estos menús ficticios y simula una reserva. No se envían datos ni se reserva una mesa real.</p>
+        <div class="demo-grid">
+          <div class="menu-panel"><h3>Un vistazo al menú</h3><p class="note">Precios ilustrativos en pesos mexicanos.</p>
+            <h4>Casa Brasa · Cocina mexicana</h4><ul><li><span>Tacos de setas (3 piezas)</span><strong>$140</strong></li><li><span>Pollo a la brasa</span><strong>$220</strong></li><li><span>Agua de jamaica</span><strong>$45</strong></li></ul>
+            <h4>Mesa Alma · Cocina italiana</h4><ul><li><span>Pizza margarita</span><strong>$210</strong></li><li><span>Pasta al pesto</span><strong>$190</strong></li><li><span>Tiramisú</span><strong>$95</strong></li></ul>
+          </div>
+          <form class="booking" id="bookingForm">
+            <label for="restaurant">Restaurante</label><select id="restaurant" name="restaurant" required><option value="Casa Brasa">Casa Brasa · Mexicana</option><option value="Mesa Alma">Mesa Alma · Italiana</option></select>
+            <div class="form-row"><div><label for="date">Fecha</label><input id="date" name="date" type="date" required></div><div><label for="time">Hora</label><select id="time" name="time" required><option value="13:00">13:00</option><option value="14:00">14:00</option><option value="15:00">15:00</option><option value="18:00">18:00</option><option value="19:00">19:00</option><option value="20:00">20:00</option><option value="21:00">21:00</option></select></div></div>
+            <label for="guests">Número de personas</label><select id="guests" name="guests" required><option value="1">1 persona</option><option value="2" selected>2 personas</option><option value="3">3 personas</option><option value="4">4 personas</option><option value="5">5 personas</option><option value="6">6 personas</option></select>
+            <button class="button dark" type="submit">Simular reserva</button><p class="note">Horarios de ejemplo; no representan disponibilidad real.</p>
+            <p id="bookingResult" role="status" aria-live="polite" tabindex="-1"></p>
+          </form>
+        </div>
+      </section>
+      <section class="partners" id="negocios"><div class="wrap"><span class="section-label">Para restaurantes</span><h2>Haz que más personas se sienten a tu mesa.</h2><p>Turno busca conectar restaurantes con personas que quieren descubrir dónde comer. Muestra tu menú, da visibilidad a tu cocina y facilita la organización de tus reservas.</p><div class="commission"><b>5%</b><span>de comisión propuesta por reserva completada. Modelo por validar.</span></div><div class="footer-cta"><a class="button lime" href="#demo">Probar la experiencia</a></div></div></section>
     </main>
-    <footer class="wrap"><span>© 2026 Turno · Mockup para Joseph Zeitoune</span><span>Encuentra tu estilo, a tu manera.</span></footer>
+    <footer class="wrap"><span>© 2026 Turno · Mockup para Joseph Zeitoune</span><span>Buena comida. Buena compañía. Tu turno.</span></footer>
     <script>
-      const locationButton = document.getElementById('locationButton');
-      const earthRadius = 6371;
-      const radians = degree => degree * Math.PI / 180;
-      function distanceBetween(lat1, lng1, lat2, lng2) {
-        const deltaLat = radians(lat2 - lat1), deltaLng = radians(lng2 - lng1);
-        const a = Math.sin(deltaLat / 2) ** 2 + Math.cos(radians(lat1)) * Math.cos(radians(lat2)) * Math.sin(deltaLng / 2) ** 2;
-        return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const form = document.getElementById('bookingForm');
+      const dateInput = document.getElementById('date');
+      const result = document.getElementById('bookingResult');
+      function todayLocal() {
+        const now = new Date();
+        return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
       }
-      locationButton.addEventListener('click', () => {
-        if (!navigator.geolocation) { locationButton.textContent = 'La ubicación no está disponible en este navegador'; return; }
-        locationButton.textContent = '⌖ Obteniendo tu ubicación…';
-        navigator.geolocation.getCurrentPosition(({ coords }) => {
-          document.querySelectorAll('.card').forEach(card => {
-            const km = distanceBetween(coords.latitude, coords.longitude, Number(card.dataset.lat), Number(card.dataset.lng));
-            card.querySelector('.travel').textContent = `⌖ A ${km.toFixed(1)} km de ti`;
-          });
-          locationButton.textContent = '⌖ Ubicación compartida · Actualizar tiempos';
-        }, () => { locationButton.textContent = 'No pudimos acceder a tu ubicación. Inténtalo de nuevo.'; }, { enableHighAccuracy: true, timeout: 10000 });
+      dateInput.min = todayLocal();
+      form.addEventListener('input', () => {
+        result.textContent = '';
+        dateInput.setCustomValidity('');
+      });
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        dateInput.min = todayLocal();
+        const selected = new Date(dateInput.value + 'T' + form.elements.time.value);
+        if (!Number.isFinite(selected.getTime()) || selected <= new Date()) {
+          dateInput.setCustomValidity('Elige una fecha y hora futuras.');
+          dateInput.reportValidity();
+          return;
+        }
+        dateInput.setCustomValidity('');
+        const date = selected.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+        result.textContent = 'Simulación lista: ' + form.elements.restaurant.value + ', ' + date + ' a las ' + form.elements.time.value + ', para ' + form.elements.guests.value + (form.elements.guests.value === '1' ? ' persona.' : ' personas.') + ' Esta prueba no genera una reserva real.';
+        result.focus();
       });
     </script>
   </body>
