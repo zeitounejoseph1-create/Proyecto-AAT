@@ -1,6 +1,8 @@
 -- Reservation core migration for PostgreSQL/Supabase.
 -- Apply to the database before enabling the Vercel function.
 
+create extension if not exists pgcrypto;
+
 alter table restaurants add column if not exists approved boolean not null default false;
 alter table restaurants add column if not exists published boolean not null default false;
 alter table restaurants add column if not exists price_per_person_cents integer check (price_per_person_cents >= 0);
@@ -48,8 +50,12 @@ begin
   select * into h from restaurant_hours
    where restaurant_id=p_restaurant_id and weekday=extract(dow from p_date)::smallint;
   if found and not h.is_closed then
-    if local_start >= p_date+h.opens_at
-       and local_end <= p_date+h.closes_at+case when h.closes_next_day then interval '1 day' else interval '0' end then
+    if local_start >= (p_date + h.opens_at)
+       and local_end <= (p_date + h.closes_at +
+         (case
+            when h.closes_next_day then interval '1 day'
+            else interval '0 days'
+          end)) then
       return true;
     end if;
   end if;
@@ -193,6 +199,11 @@ revoke all on function list_bookable_restaurants() from public;
 revoke all on function available_reservation_slots(uuid,date,integer) from public;
 revoke all on function create_restaurant_reservation(uuid,date,time,integer,text,text,text,text) from public;
 revoke all on function reservation_for_guest(text) from public;
+revoke all on function reservation_time_is_open(uuid,date,time,integer) from anon, authenticated;
+revoke all on function list_bookable_restaurants() from anon, authenticated;
+revoke all on function available_reservation_slots(uuid,date,integer) from anon, authenticated;
+revoke all on function create_restaurant_reservation(uuid,date,time,integer,text,text,text,text) from anon, authenticated;
+revoke all on function reservation_for_guest(text) from anon, authenticated;
 grant execute on function available_reservation_slots(uuid,date,integer) to service_role;
 grant execute on function list_bookable_restaurants() to service_role;
 grant execute on function create_restaurant_reservation(uuid,date,time,integer,text,text,text,text) to service_role;

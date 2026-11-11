@@ -7,7 +7,11 @@ const json = (res, status, body) => {
   res.end(JSON.stringify(body));
 };
 
-const configured = () => Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+// Keep the secret server-side. SUPABASE_SECRET_KEY is Supabase's current
+// `sb_secret_...` key; the legacy name remains as a temporary compatibility
+// fallback during rotation.
+const supabaseSecretKey = () => process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+const configured = () => Boolean(process.env.SUPABASE_URL && supabaseSecretKey());
 const hashToken = value => createHash('sha256').update(value).digest('hex');
 
 async function rpc(name, payload) {
@@ -15,8 +19,8 @@ async function rpc(name, payload) {
   const response = await fetch(`${base}/rest/v1/rpc/${name}`, {
     method: 'POST',
     headers: {
-      apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      apikey: supabaseSecretKey(),
+      Authorization: `Bearer ${supabaseSecretKey()}`,
       'Content-Type': 'application/json',
       Accept: 'application/json'
     },

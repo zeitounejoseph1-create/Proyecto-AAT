@@ -17,6 +17,7 @@ function request(method, query = {}, body = {}) {
 
 test('reservation API stays unavailable when database secrets are missing', async () => {
   delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SECRET_KEY;
   delete process.env.SUPABASE_SERVICE_ROLE_KEY;
   const res = mockResponse();
   await handler(request('GET'), res);
@@ -26,7 +27,7 @@ test('reservation API stays unavailable when database secrets are missing', asyn
 
 test('reservation API validates before contacting PostgreSQL', async () => {
   process.env.SUPABASE_URL = 'https://database.example.test';
-  process.env.SUPABASE_SERVICE_ROLE_KEY = 'server-only-test-secret';
+  process.env.SUPABASE_SECRET_KEY = 'server-only-test-secret';
   const originalFetch = global.fetch;
   let called = false;
   global.fetch = async () => { called = true; throw new Error('unexpected DB call'); };
@@ -42,7 +43,7 @@ test('reservation API validates before contacting PostgreSQL', async () => {
 
 test('reservation API sends the approved exact test input to the atomic database function', async () => {
   process.env.SUPABASE_URL = 'https://database.example.test';
-  process.env.SUPABASE_SERVICE_ROLE_KEY = 'server-only-test-secret';
+  process.env.SUPABASE_SECRET_KEY = 'server-only-test-secret';
   const originalFetch = global.fetch;
   let sent;
   global.fetch = async (url, options) => {
@@ -72,7 +73,7 @@ test('reservation API sends the approved exact test input to the atomic database
 
 test('database availability conflicts return HTTP 409', async () => {
   process.env.SUPABASE_URL = 'https://database.example.test';
-  process.env.SUPABASE_SERVICE_ROLE_KEY = 'server-only-test-secret';
+  process.env.SUPABASE_SECRET_KEY = 'server-only-test-secret';
   const originalFetch = global.fetch;
   global.fetch = async () => ({ ok: false, status: 400, json: async () => ({ code: 'P0001', message: 'No compatible table is available at this time' }) });
   try {

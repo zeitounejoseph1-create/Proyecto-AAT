@@ -14,7 +14,7 @@ La página conserva el modo de demostración local. La ruta de servidor solo act
 En la configuración de entorno de Vercel agrega:
 
 - `SUPABASE_URL`: URL del proyecto Supabase.
-- `SUPABASE_SERVICE_ROLE_KEY`: clave de servicio privada de Supabase. Guárdala solo como variable de servidor; nunca la agregues a `index.html` ni a una variable pública `NEXT_PUBLIC_*`.
+- `SUPABASE_SECRET_KEY`: nueva clave secreta privada de Supabase (`sb_secret_...`). Guárdala solo como variable de servidor; nunca la agregues a `index.html` ni a una variable pública `NEXT_PUBLIC_*`. `SUPABASE_SERVICE_ROLE_KEY` se conserva temporalmente como nombre legado compatible, pero las nuevas configuraciones deben usar `SUPABASE_SECRET_KEY`.
 
 La ruta `/api/reservations` informa que está sin configurar hasta que ambas variables existan. El cliente entonces continúa en modo local, y sus mensajes identifican las reservas como locales. Cuando la ruta confirma que el backend está configurado, el formulario carga restaurantes aprobados con suscripción activa y la base de datos valida de nuevo horario, capacidad y conflictos al confirmar.
 

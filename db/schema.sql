@@ -1,6 +1,9 @@
 -- MesaLista: esquema inicial PostgreSQL para sustituir la persistencia local del MVP.
 -- Ejecutar mediante una herramienta de migraciones (por ejemplo Prisma, Drizzle o node-pg-migrate).
 
+-- Requerida por gen_random_uuid(), utilizada por la API de reservaciones.
+create extension if not exists pgcrypto;
+
 create type user_role as enum ('customer', 'restaurant_owner', 'platform_admin');
 create type reservation_status as enum ('pending', 'confirmed', 'cancelled', 'attended', 'no_show');
 create type subscription_status as enum ('trial', 'active', 'past_due', 'cancelled');
@@ -139,3 +142,17 @@ create table reviews (
   body text not null check (char_length(body) between 3 and 280),
   created_at timestamptz not null default now()
 );
+
+-- La API pública solo debe acceder mediante las funciones RPC de reservation_core.sql.
+-- service_role puede ejecutar esas funciones y bypassa RLS en Supabase.
+alter table users enable row level security;
+alter table restaurants enable row level security;
+alter table restaurant_hours enable row level security;
+alter table dining_tables enable row level security;
+alter table availability_blocks enable row level security;
+alter table menu_items enable row level security;
+alter table reservations enable row level security;
+alter table subscriptions enable row level security;
+alter table payment_events enable row level security;
+alter table reward_ledger enable row level security;
+alter table reviews enable row level security;
