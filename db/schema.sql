@@ -46,7 +46,9 @@ create table restaurant_hours (
   closes_at time not null,
   closes_next_day boolean not null default false,
   is_closed boolean not null default false,
-  check (is_closed or (opens_at <> closes_at and (closes_next_day or opens_at < closes_at))),
+  constraint restaurant_hours_valid_interval check (is_closed or
+    (opens_at < time '24:00' and ((closes_next_day and closes_at <= opens_at) or
+      (not closes_next_day and opens_at < closes_at)))),
   unique (restaurant_id, weekday)
 );
 
@@ -57,7 +59,8 @@ create table dining_tables (
   capacity smallint not null check (capacity between 1 and 30),
   combinable_group text,
   active boolean not null default true,
-  unique (restaurant_id, label)
+  unique (restaurant_id, label),
+  constraint dining_tables_id_restaurant_unique unique (id, restaurant_id)
 );
 
 create table availability_blocks (
@@ -67,6 +70,8 @@ create table availability_blocks (
   starts_at timestamptz not null,
   ends_at timestamptz not null,
   reason text,
+  constraint availability_blocks_table_restaurant_fk foreign key (table_id, restaurant_id)
+    references dining_tables(id, restaurant_id) on delete cascade,
   check (starts_at < ends_at)
 );
 
@@ -91,17 +96,24 @@ create table reservations (
   status reservation_status not null default 'pending',
   guest_access_token_hash text unique,
   idempotency_key text unique,
+  -- Snapshot del contacto de esta solicitud; no cambia el perfil global del usuario.
+  customer_name text,
+  customer_email text,
+  booking_timezone text,
+  idempotency_request_hash text,
   payment_guarantee_provider text,
   payment_guarantee_reference text,
   created_at timestamptz not null default now(),
-  check (starts_at < ends_at)
+  check (starts_at < ends_at),
+  constraint reservations_table_restaurant_fk foreign key (table_id, restaurant_id)
+    references dining_tables(id, restaurant_id)
 );
 
 -- Impide que una misma mesa tenga dos reservas activas que se solapen.
 create extension if not exists btree_gist;
 alter table reservations add constraint no_overlapping_active_reservation
   exclude using gist (table_id with =, tstzrange(starts_at, ends_at, '[)') with &&)
-  where (status in ('pending', 'confirmed'));
+  where (status in ('pending', 'confirmed', 'attended'));
 create index reservations_restaurant_time_idx on reservations (restaurant_id, starts_at);
 
 create table subscriptions (

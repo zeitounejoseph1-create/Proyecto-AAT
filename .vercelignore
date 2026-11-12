@@ -1,0 +1,8 @@
+db/
+scripts/
+tests/
+docs/
+work/
+reservation-api.test.cjs
+README.md
+.github/
