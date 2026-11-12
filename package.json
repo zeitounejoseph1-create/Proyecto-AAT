@@ -1,0 +1,22 @@
+{
+  "name": "mesalista",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reservaciones de restaurantes con Supabase y Vercel",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env.local scripts/dev-server.cjs",
+    "test": "node --test reservation-api.test.cjs",
+    "test:database": "node --test scripts/verify-database.cjs",
+    "test:browser": "node --test tests/browser.test.cjs",
+    "test:all": "node --test reservation-api.test.cjs && node --test scripts/verify-database.cjs && node --test tests/browser.test.cjs"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "devDependencies": {
+    "embedded-postgres": "18.6.0-beta.19",
+    "pg": "8.16.3",
+    "playwright": "1.62.1"
+  }
+}
