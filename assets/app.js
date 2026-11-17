@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const API = '/api/reservations';
-  const KEYS = { demo: 'mesalista-demo-restaurants-v2', tokens: 'mesalista-reservation-access-tokens', receiptPrefix: 'mesalista-receipt-v1:', pending: 'mesalista-pending-reservation-v1', pendingPrefix: 'mesalista-request-v2:' };
+  const KEYS = { demo: 'mesalista-demo-restaurants-v2', tokens: 'mesalista-reservation-access-tokens', receiptPrefix: 'mesalista-receipt-v1:', pending: 'mesalista-pending-reservation-v1', pendingPrefix: 'mesalista-request-v2:', catalogue: 'mesalista-public-catalogue-v1' };
   const $ = id => document.getElementById(id);
   const days = [['sun', 'Domingo'], ['mon', 'Lunes'], ['tue', 'Martes'], ['wed', 'Miércoles'], ['thu', 'Jueves'], ['fri', 'Viernes'], ['sat', 'Sábado']];
   const money = value => value == null ? 'Precio por consultar' : new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(value) + ' MXN';
@@ -31,6 +31,14 @@
   function write(key, value) {
     try { if (value == null) localStorage.removeItem(key); else localStorage.setItem(key, JSON.stringify(value)); return true; }
     catch { return false; }
+  }
+  function savedRealCatalogue() {
+    const cached = read(KEYS.catalogue, null);
+    const legacy = read('mesalista-mvp', null);
+    const valid = item => item && typeof item.id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id) && typeof item.name === 'string' && typeof item.cuisine === 'string' && typeof item.address === 'string' && Array.isArray(item.menu) && Array.isArray(item.tables) && !item.demo;
+    const current = Array.isArray(cached?.restaurants) ? cached.restaurants.filter(valid) : [];
+    const previous = Array.isArray(legacy?.restaurants) ? legacy.restaurants.filter(valid) : [];
+    return current.length ? current : previous;
   }
   const validToken = value => typeof value === 'string' && /^[A-Za-z0-9_-]{40,200}$/.test(value);
   function storageKeys(prefix) { try { return Object.keys(localStorage).filter(key => key.startsWith(prefix)); } catch { return []; } }
@@ -108,7 +116,7 @@
     $('results').replaceChildren();
     if (state.mode === 'loading') { $('status').textContent = 'Conectando con el servicio de reservas…'; return; }
     if (state.loading) { $('status').textContent = 'Consultando disponibilidad en el servidor…'; return; }
-    $('status').textContent = state.mode === 'online' ? (state.failed ? 'No pudimos consultar todos los horarios. Vuelve a buscar. ' : '') + (list.length + ' restaurante(s) con disponibilidad consultada para ' + f.party + ' personas' + (f.time ? ' a las ' + formatTime(f.time) : '') + '.') : 'Catálogo de ejemplo. No representa disponibilidad ni restaurantes publicados.';
+    $('status').textContent = state.mode === 'online' ? (state.failed ? 'No pudimos consultar todos los horarios. Vuelve a buscar. ' : '') + (list.length + ' restaurante(s) con disponibilidad consultada para ' + f.party + ' personas' + (f.time ? ' a las ' + formatTime(f.time) : '') + '.') : (state.restaurants.some(r => !r.demo) ? 'Perfiles guardados. Su publicación y disponibilidad están pendientes de verificar con el servidor.' : 'Catálogo de ejemplo. No representa disponibilidad ni restaurantes publicados.');
     for (const restaurant of list) {
       const card = node('article', null, 'card');
       card.append(photo(restaurant.img, restaurant.demo ? 'Fotografía ilustrativa' : restaurant.name));
@@ -117,10 +125,10 @@
       pad.append(node('span', restaurant.demo ? 'EJEMPLO · ' + restaurant.cuisine : restaurant.cuisine, 'tag'), node('h3', restaurant.name), node('p', restaurant.address), node('p', money(restaurant.pricePerPerson) + ' por persona'));
       pad.append(node('p', restaurant.rating == null ? 'Sin calificación verificada' : 'Calificación verificada: ' + restaurant.rating + ' / 5'));
       const footer = node('div', null, 'card-footer');
-      footer.append(node('span', restaurant.demo ? 'Reserva real no disponible' : formatTime(f.time)), button(restaurant.demo ? 'Ver ejemplo' : 'Ver y reservar', () => show(restaurant.id), 'btn primary'));
+      footer.append(node('span', restaurant.demo || state.mode !== 'online' ? 'Disponibilidad sin verificar' : formatTime(f.time)), button(restaurant.demo ? 'Ver ejemplo' : state.mode === 'online' ? 'Ver y reservar' : 'Ver perfil guardado', () => show(restaurant.id), 'btn primary'));
       pad.append(footer); card.append(pad); $('results').append(card);
     }
-    if (!list.length) $('results').append(node('p', state.mode === 'online' ? 'No hay mesas con esos criterios. Cambia la fecha, hora o personas.' : 'No hay ejemplos con esos criterios.'));
+    if (!list.length) $('results').append(node('p', state.mode === 'online' ? 'No hay mesas con esos criterios. Cambia la fecha, hora o personas.' : 'No hay perfiles con esos criterios.'));
   }
 
   let searchTimer;
@@ -161,9 +169,10 @@
     const menu = node('ul', null, 'menu-items');
     for (const item of restaurant.menu) { const li = node('li'); li.append(node('span', item[0]), node('span', money(item[1]))); menu.append(li); }
     content.append(menu.childElementCount ? menu : node('p', 'Menú pendiente de actualizar.'), node('h3', 'Horarios'));
-    if (restaurant.weeklyHours) for (const [key, label] of days) { const h = restaurant.weeklyHours[key]; if (h) content.append(node('p', label + ': ' + (h.closed ? 'Cerrado' : formatTime(h.open) + ' – ' + formatTime(h.close) + (h.closes_next_day ? ' del día siguiente' : '')))); }
-    else content.append(node('p', 'Horarios de ejemplo pendientes de configurar.'));
-    if (restaurant.demo || state.mode !== 'online') { content.append(node('p', 'Este perfil es un ejemplo. No se pueden confirmar reservas reales.', 'notice')); $('modal').showModal(); return; }
+    if (restaurant.weeklyHours && days.some(([key]) => restaurant.weeklyHours[key])) {
+      for (const [key, label] of days) { const h = restaurant.weeklyHours[key]; if (h) content.append(node('p', label + ': ' + (h.closed ? 'Cerrado' : formatTime(h.open) + ' – ' + formatTime(h.close) + (h.closes_next_day ? ' del día siguiente' : '')))); }
+    } else content.append(node('p', 'Horarios pendientes de consultar con el restaurante.'));
+    if (restaurant.demo || state.mode !== 'online') { content.append(node('p', restaurant.demo ? 'Este perfil es un ejemplo. No se pueden confirmar reservas reales.' : 'Perfil guardado. Es necesario reconectar para verificar disponibilidad y guardar una reserva.', 'notice')); $('modal').showModal(); return; }
     if (state.loading || !hasSlot(restaurant, f)) { content.append(node('p', 'Actualiza la búsqueda para seleccionar un horario disponible.', 'notice')); $('modal').showModal(); return; }
     content.append(node('h3', 'Reservar'), node('p', f.party + ' personas · ' + f.date + ' · ' + formatTime(f.time)), node('p', 'Zona horaria: ' + restaurant.timezone), node('p', restaurant.policy));
     const form = node('form', null, 'booking-form'); form.id = 'bookingForm';
@@ -358,7 +367,7 @@
     const next = existing ? demo.map(r => r.id === item.id ? item : r) : [...demo, item];
     if (!write(KEYS.demo, next)) { $('restaurantStatus').textContent = 'No se pudo guardar. Reduce el tamaño de las fotos o permite el almacenamiento del sitio.'; return; }
     demo = next; updateEditor(); $('editRestaurantSelect').value = item.id;
-    if (state.mode === 'offline') { state.restaurants = demo; updateCuisine(); render(); renderNearby(); }
+    if (state.mode === 'offline' && !state.restaurants.some(r => !r.demo)) { state.restaurants = demo; updateCuisine(); render(); renderNearby(); }
     $('restaurantStatus').textContent = 'Ejemplo guardado en este navegador. No se publicó ni se activó una suscripción.';
   });
 
@@ -394,11 +403,15 @@
       const health = await request(); if (!health.configured) throw new Error('Servicio sin configurar');
       const data = await request('?mode=restaurants'); if (!Array.isArray(data.restaurants)) throw new Error('Catálogo no verificado');
       state.restaurants = data.restaurants.map(r => ({ id: r.id, name: r.name, cuisine: r.cuisine, address: r.address, pricePerPerson: r.price_per_person == null || r.price_per_person === 0 ? null : Number(r.price_per_person), img: r.image_url || examples[0].img, hasOwnPhoto: !!r.image_url, menu: Array.isArray(r.menu) ? r.menu : [], tables: r.tables || [], weeklyHours: r.weekly_hours, timezone: r.timezone, lat: r.latitude == null ? null : Number(r.latitude), lng: r.longitude == null ? null : Number(r.longitude), rating: r.rating == null ? null : Number(r.rating), policy: r.cancellation_policy || 'Consulta la política con el restaurante.' }));
+      // Public profile data only: never cache table availability or reservation state.
+      write(KEYS.catalogue, { restaurants: state.restaurants, savedAt: new Date().toISOString() });
       state.mode = 'online'; $('serviceStatus').textContent = 'Reservas conectadas al servidor. Cada confirmación y cancelación se guarda en Supabase.';
       updateCuisine(); await refreshAvailability();
     } catch {
-      state.mode = 'offline'; state.restaurants = demo;
-      $('serviceStatus').textContent = 'Las reservas reales no están disponibles. Mostramos ejemplos para explorar; ninguna mesa se puede confirmar.';
+      const saved = savedRealCatalogue();
+      state.mode = 'offline'; state.loading = false; state.availability.clear();
+      state.restaurants = saved.length ? saved : demo;
+      $('serviceStatus').textContent = saved.length ? 'Servicio temporalmente no disponible. Conservamos los perfiles guardados; ninguna disponibilidad ni nueva reserva se confirma sin el servidor.' : 'Las reservas reales no están disponibles. Mostramos ejemplos para explorar; ninguna mesa se puede confirmar.';
       updateCuisine(); render();
     }
     renderNearby(); await syncReservations();

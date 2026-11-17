@@ -1,6 +1,6 @@
 # MesaLista
 
-Reservas para restaurantes en México. Continúa la aplicación existente con HTML, CSS, JavaScript, funciones Node en Vercel y PostgreSQL/Supabase. Modelo previsto: suscripción semanal configurable sin comisión por reserva.
+Reservas para restaurantes en México. Continúa la aplicación existente con HTML, CSS, JavaScript, funciones Node en Vercel y PostgreSQL/Supabase. El código conserva un filtro legado de suscripción activa. El plan solicitado el 17 de noviembre contempla alta gratuita y bonos opcionales con comisión del 15% sobre el presupuesto del bono redimido; esa adaptación no se implementa durante este diagnóstico.
 
 ## Desarrollo
 
@@ -11,7 +11,9 @@ pnpm install --frozen-lockfile --ignore-scripts
 pnpm dev
 ```
 
-Abrir `http://127.0.0.1:3000`. Sin credenciales muestra ejemplos y no confirma mesas. Para Supabase de desarrollo configurar `.env.local` desde `.env.example` y seguir [la guía](db/RESERVATION_SETUP.md).
+Abrir `http://127.0.0.1:3000`. Sin credenciales conserva los perfiles guardados o, si no hay ninguno, muestra ejemplos identificados; no confirma mesas. Para Supabase de desarrollo configurar `.env.local` desde `.env.example` y seguir [la guía](db/RESERVATION_SETUP.md).
+
+El [diagnóstico del 17 de noviembre](docs/DIAGNOSTICO_2026-11-17.md) explica las variables, el catálogo filtrado, los permisos de Vercel y lo que falta verificar. `pnpm diagnose:local` y `pnpm diagnose:public` hacen únicamente consultas GET y no imprimen secretos. El primero devuelve código de salida 2 si el servicio local no está configurado.
 
 ## Estructura
 

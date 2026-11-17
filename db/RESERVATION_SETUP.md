@@ -4,7 +4,9 @@
 
 El flujo navegador → API → PostgreSQL se verificó con datos desechables locales. No se aplicó esta migración al proyecto Supabase real ni se publicó en Vercel. La salud `configured: true` sólo indica variables válidas; el catálogo y las operaciones comprueban los RPC.
 
-La interfaz confirma únicamente respuestas verificadas del servidor. Sin servicio muestra ejemplos identificados y desactiva reservas reales. `localStorage` conserva comprobantes privados, solicitudes pendientes y ejemplos; no determina cupos, asistencia, puntos ni confirmaciones.
+La interfaz confirma únicamente respuestas verificadas del servidor. Sin servicio conserva perfiles públicos guardados con disponibilidad sin verificar; si no hay perfiles guardados muestra ejemplos identificados. En ambos casos desactiva reservas reales. `localStorage` conserva perfiles, comprobantes privados, solicitudes pendientes y ejemplos; no determina cupos, asistencia, puntos ni confirmaciones.
+
+El diagnóstico actual y los pasos para configurar el entorno están en [DIAGNOSTICO_2026-11-17.md](../docs/DIAGNOSTICO_2026-11-17.md). Durante ese diagnóstico no se aplicaron migraciones ni se escribieron datos en Supabase real. El filtro de suscripción descrito aquí refleja el código legado; no representa el nuevo plan de alta gratuita y bonos opcionales.
 
 ## Base de datos
 

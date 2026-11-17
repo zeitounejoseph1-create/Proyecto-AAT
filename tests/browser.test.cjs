@@ -46,7 +46,9 @@ test('browser reservation safety with real PostgreSQL', { timeout: 120000 }, asy
   const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}) });
   const originalEnv = { url: process.env.SUPABASE_URL, secret: process.env.SUPABASE_SECRET_KEY };
   try {
-    const fixture = await seedRestaurant(db, { name: '<img src=x onerror=alert(1)> Test Restaurant' });
+    const fixture = await seedRestaurant(db, { name: '<img src=x onerror=alert(1)> Test Restaurant México' });
+    await db.pool.query("update restaurants set latitude=19.421,longitude=-99.168,image_url='https://images.unsplash.com/test-real-profile' where id=$1", [fixture.id]);
+    await db.pool.query("insert into menu_items(id,restaurant_id,name,price_cents) values(gen_random_uuid(),$1,'Menú conservado',18500)", [fixture.id]);
     const context = await browser.newContext();
     // External illustrative photos are irrelevant to reservation tests.
     await context.route('https://images.unsplash.com/**', route => route.fulfill({ status: 204 }));
@@ -148,7 +150,83 @@ test('browser reservation safety with real PostgreSQL', { timeout: 120000 }, asy
       assert.equal(await page.locator('input[autocomplete="cc-number"]').count(), 0);
       assert.deepEqual(errors, []);
     });
+
+    await t.test('name suggestions, cuisine, price, menu, photo, hours and location use the real catalogue', async () => {
+      await page.locator('#date').fill(fixture.date);
+      await page.locator('#guests').selectOption('2');
+      await page.locator('#q').fill('mExIcO');
+      await page.locator('#nameSuggestions button').click();
+      await page.locator('#status').filter({ hasText: '1 restaurante(s)' }).waitFor();
+      await page.locator('#cuisine').selectOption('Mexicana');
+      await page.locator('#price').selectOption('200');
+      await page.locator('#status').filter({ hasText: '0 restaurante(s)' }).waitFor();
+      await page.locator('#price').selectOption('400');
+      await page.locator('#status').filter({ hasText: '1 restaurante(s)' }).waitFor();
+      await page.locator('#time').selectOption('16:00');
+      assert.match(await page.locator('#results img').getAttribute('src'), /test-real-profile/);
+      await page.getByRole('button', { name: 'Ver y reservar', exact: true }).click();
+      assert.match(await page.locator('#modalContent').textContent(), /Menú conservado/);
+      assert.match(await page.locator('#modalContent').textContent(), /185.*MXN/);
+      assert.match(await page.locator('#modalContent').textContent(), /Lunes:/);
+      await page.locator('#close').click();
+      await context.setGeolocation({ latitude: 19.421, longitude: -99.168 });
+      await context.grantPermissions(['geolocation'], { origin: url });
+      await page.locator('#geo').click();
+      await page.locator('#nearbyList').filter({ hasText: '0.0 km' }).waitFor();
+      assert.match(await page.locator('#nearbyList').textContent(), /Test Address/);
+      await page.locator('#q').fill(''); await page.locator('#price').selectOption('');
+    });
+
+    await t.test('server outage keeps saved real profiles and never offers cached availability or confirmation', async () => {
+      const before = (await db.pool.query('select count(*)::integer as count from reservations')).rows[0].count;
+      const cache = await page.evaluate(() => JSON.parse(localStorage.getItem('mesalista-public-catalogue-v1')));
+      assert.equal(cache.restaurants[0].id, fixture.id);
+      assert.equal('slots' in cache.restaurants[0], false);
+      assert.equal('reservations' in cache, false);
+      delete process.env.SUPABASE_URL; delete process.env.SUPABASE_SECRET_KEY;
+      const posts = []; const onRequest = request => { if (request.method() === 'POST') posts.push(request.url()); };
+      page.on('request', onRequest);
+      try {
+        await page.reload();
+        await page.locator('#serviceStatus').filter({ hasText: 'Conservamos los perfiles' }).waitFor();
+        assert.equal(await page.getByRole('button', { name: 'Ver ejemplo', exact: true }).count(), 0);
+        assert.match(await page.locator('#results').textContent(), /Disponibilidad sin verificar/);
+        assert.equal(await page.locator('#results img[onerror]').count(), 0);
+        await page.getByRole('button', { name: 'Ver perfil guardado', exact: true }).click();
+        assert.match(await page.locator('#modalContent').textContent(), /Menú conservado/);
+        assert.match(await page.locator('#modalContent').textContent(), /necesario reconectar/);
+        assert.equal(await page.locator('#confirm').count(), 0);
+        await page.locator('#close').click();
+        await page.locator('#newRestaurantName').fill('Separate local example');
+        await page.getByRole('button', { name: 'Guardar ejemplo local', exact: true }).click();
+        await page.locator('#restaurantStatus').filter({ hasText: 'Ejemplo guardado' }).waitFor();
+        assert.equal(await page.getByRole('button', { name: 'Ver perfil guardado', exact: true }).count(), 1, 'editing examples must not replace saved real profiles');
+        assert.deepEqual(posts, []);
+        assert.equal((await db.pool.query('select count(*)::integer as count from reservations')).rows[0].count, before);
+      } finally {
+        page.off('request', onRequest);
+        Object.assign(process.env, { SUPABASE_URL: originalEnv.url, SUPABASE_SECRET_KEY: originalEnv.secret });
+      }
+    });
     await context.close();
+
+    await t.test('legacy UUID profiles remain viewable offline without being treated as bookable examples', async () => {
+      delete process.env.SUPABASE_URL; delete process.env.SUPABASE_SECRET_KEY;
+      const legacy = await browser.newContext();
+      await legacy.route('https://images.unsplash.com/**', route => route.fulfill({ status: 204 }));
+      await legacy.addInitScript(id => localStorage.setItem('mesalista-mvp', JSON.stringify({ restaurants: [{ id, name: 'Perfil anterior', cuisine: 'Mexicana', address: 'Dirección conservada', menu: [['Platillo anterior', 150]], tables: [['A1', 4]], pricePerPerson: 300, weeklyHours: {} }], reservations: [{ status: 'confirmed' }] })), fixture.id);
+      try {
+        const p = await legacy.newPage();
+        await p.goto(url);
+        await p.getByRole('button', { name: 'Ver perfil guardado', exact: true }).click();
+        assert.match(await p.locator('#modalContent').textContent(), /Platillo anterior/);
+        assert.match(await p.locator('#modalContent').textContent(), /Horarios pendientes de consultar/);
+        assert.equal(await p.locator('#confirm').count(), 0);
+        assert.equal(await p.locator('#myBookings .card').count(), 0, 'legacy local reservations are not server confirmations');
+      } finally {
+        await legacy.close(); Object.assign(process.env, { SUPABASE_URL: originalEnv.url, SUPABASE_SECRET_KEY: originalEnv.secret });
+      }
+    });
 
     await t.test('unconfigured service and corrupt legacy storage cannot create fake confirmations', async () => {
       delete process.env.SUPABASE_URL; delete process.env.SUPABASE_SECRET_KEY; delete process.env.SUPABASE_SERVICE_ROLE_KEY;

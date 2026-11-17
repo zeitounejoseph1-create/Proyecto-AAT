@@ -8,10 +8,12 @@
   },
   "scripts": {
     "dev": "node --env-file-if-exists=.env.local scripts/dev-server.cjs",
-    "test": "node --test reservation-api.test.cjs",
-    "test:database": "node --test scripts/verify-database.cjs",
+    "test": "node --test reservation-api.test.cjs tests/diagnose.test.cjs",
+    "test:database": "node --test scripts/verify-database.cjs tests/catalog.test.cjs",
     "test:browser": "node --test tests/browser.test.cjs",
-    "test:all": "node --test reservation-api.test.cjs && node --test scripts/verify-database.cjs && node --test tests/browser.test.cjs"
+    "test:all": "node --test reservation-api.test.cjs tests/diagnose.test.cjs scripts/verify-database.cjs tests/catalog.test.cjs tests/browser.test.cjs",
+    "diagnose:local": "node --env-file-if-exists=.env.local scripts/diagnose.cjs local",
+    "diagnose:public": "node scripts/diagnose.cjs public"
   },
   "packageManager": "pnpm@11.25.0",
   "devDependencies": {
