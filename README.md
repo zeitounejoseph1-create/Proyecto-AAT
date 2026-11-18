@@ -39,8 +39,8 @@ GitHub Actions ejecuta API, PostgreSQL y navegador con datos temporales, sin sec
 
 ## Instalación de Vercel
 
-`vercel.json` utiliza `pnpm install --prod --frozen-lockfile`. La API usa módulos de Node y HTTP hacia Supabase; `embedded-postgres`, `pg` y `playwright` se conservan como herramientas de pruebas en `devDependencies` y quedan fuera de la instalación de despliegue. No se autorizaron scripts adicionales de dependencias ni se desactivó la política estricta de pnpm.
+`vercel.json` utiliza `pnpm install --prod --frozen-lockfile` para la instalación general. La función nativa de `/api` puede ejecutar su propio instalador: `api/package.json` y `api/pnpm-lock.yaml` delimitan por eso un paquete independiente sin dependencias externas. La API usa módulos de Node y HTTP hacia Supabase; `embedded-postgres`, `pg` y `playwright` se conservan como herramientas de pruebas en las `devDependencies` de la raíz. No se autorizaron scripts adicionales de dependencias ni se desactivó la política estricta de pnpm.
 
-`pnpm verify:production` repite esa instalación en un directorio limpio sin secretos, comprueba que el lockfile no cambie y ejecuta los 20 casos de la API sin los paquetes de pruebas instalados. CI ejecuta esta comprobación además de las 45 pruebas existentes. La [corrección de instalación y sus límites de verificación](docs/CORRECCION_INSTALACION_VERCEL_2026-11-17.md) detalla el error reproducido, el empaquetado oficial y los pasos para una futura Preview.
+`pnpm verify:production` verifica en un directorio limpio la instalación general y la instalación predeterminada del paquete de la API, conserva ambos lockfiles y ejecuta los 20 casos de la API sin herramientas de pruebas instaladas. CI ejecuta esta comprobación además de las 45 pruebas existentes. La [corrección para el instalador nativo](docs/CORRECCION_API_NATIVA_VERCEL_2026-11-18.md) explica por qué el comando general no bastaba.
 
 La [entrega de etapa 1](docs/ETAPA_1.md) detalla mejoras y pendientes. El editor de ejemplos sigue siendo local; cuentas, panel autorizado, pagos, recompensas y notificaciones no están activados.

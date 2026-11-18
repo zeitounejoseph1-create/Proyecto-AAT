@@ -1,0 +1,10 @@
+{
+  "name": "mesalista-reservations-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API de reservas sin dependencias externas; herramientas de pruebas en la raiz",
+  "engines": {
+    "node": "24.x"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

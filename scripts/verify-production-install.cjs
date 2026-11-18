@@ -22,7 +22,7 @@ async function main() {
   try {
     await mkdir(path.join(temp, 'api'));
     // Copy an explicit list: no secrets, SQL, browser state, or existing modules.
-    for (const name of ['package.json', 'pnpm-lock.yaml', 'reservation-api.test.cjs', 'api/reservations.js']) {
+    for (const name of ['package.json', 'pnpm-lock.yaml', 'reservation-api.test.cjs', 'api/reservations.js', 'api/package.json', 'api/pnpm-lock.yaml']) {
       await copyFile(path.join(root, name), path.join(temp, name));
     }
     const originalLock = await readFile(path.join(temp, 'pnpm-lock.yaml'));
@@ -52,11 +52,26 @@ async function main() {
     for (const name of ['embedded-postgres', 'pg', 'playwright']) {
       assert.throws(() => requireFromProduction.resolve(name), { code: 'MODULE_NOT_FOUND' }, `${name} must not be in the production install`);
     }
+    // Native /api functions can ignore the project Install Command. Their
+    // default install must stop at the API's own empty package and lockfile.
+    const apiPackage = JSON.parse(await readFile(path.join(temp, 'api/package.json'), 'utf8'));
+    assert.equal(Object.keys(apiPackage.dependencies || {}).length, 0);
+    assert.equal(Object.keys(apiPackage.devDependencies || {}).length, 0);
+    const apiLock = await readFile(path.join(temp, 'api/pnpm-lock.yaml'));
+    // The repository has no workspace. Remove only this verifier's temporary
+    // root policy file so it cannot turn the independent API into a workspace.
+    await rm(path.join(temp, 'pnpm-workspace.yaml'));
+    if (pnpm && /pnpm\.(?:c?js|mjs)$/.test(pnpm)) {
+      await run(process.execPath, [pnpm, 'install', '--frozen-lockfile'], path.join(temp, 'api'), cleanEnv);
+    } else {
+      await run(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm', ['install', '--frozen-lockfile'], path.join(temp, 'api'), cleanEnv);
+    }
+    assert.deepEqual(await readFile(path.join(temp, 'api/pnpm-lock.yaml')), apiLock);
     // pnpm may leave metadata under node_modules; no dependency package may remain.
     const modules = await readdir(path.join(temp, 'node_modules')).catch(error => { if (error.code === 'ENOENT') return []; throw error; });
     assert.deepEqual(modules.filter(name => !name.startsWith('.')), [], 'no runtime dependency is currently required');
     await run(process.execPath, ['--test', 'reservation-api.test.cjs'], temp, cleanEnv);
-    console.log('PASS: clean production install; strict dependency script policy; unchanged lockfile; no test packages; 20 API tests');
+    console.log('PASS: clean production and native API installs; strict dependency script policy; unchanged lockfiles; no test packages; 20 API tests');
   } finally {
     await rm(temp, { recursive: true, force: true });
   }

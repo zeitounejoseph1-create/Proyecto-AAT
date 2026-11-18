@@ -1,5 +1,7 @@
 # MesaLista — corrección de instalación en Vercel
 
+> Actualización del 18 de noviembre: las Preview reales mostraron que el Install Command general no bastaba para el instalador de la función nativa de `/api`. Ver [la corrección posterior](CORRECCION_API_NATIVA_VERCEL_2026-11-18.md). Este documento conserva los resultados históricos y sus límites.
+
 17 de noviembre de 2026. Solo Etapa 1, rama `codex/etapa-1-diagnostico-20261117`. Respaldo conservado en `8a497bf5533c17ea2bdbbb5e7234579d2534d61c`.
 
 ## Causa identificada y reproducida
