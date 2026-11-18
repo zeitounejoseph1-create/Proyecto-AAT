@@ -2,11 +2,11 @@
 
 ## Estado de esta entrega
 
-El flujo navegador → API → PostgreSQL se verificó con datos desechables locales. No se aplicó esta migración al proyecto Supabase real ni se publicó en Vercel. La salud `configured: true` sólo indica variables válidas; el catálogo y las operaciones comprueban los RPC.
+El flujo navegador → API → Supabase se verificó con datos ficticios exclusivamente en **MesaLista-Desarrollo** el 17 de noviembre de 2026. El usuario aplicó las migraciones y la carga inicial desde el SQL Editor; las pruebas comprobaron reserva guardada, comprobante, rechazo de dobles reservas, cancelación y cupo liberado. Las 45 pruebas locales también pasaron. No se publicó en Vercel ni se modificó producción. La salud `configured: true` sólo indica variables válidas; el catálogo y las operaciones comprueban los RPC. La evidencia y los pendientes están en [el informe de integración](../docs/INTEGRACION_DESARROLLO_2026-11-17.md).
 
 La interfaz confirma únicamente respuestas verificadas del servidor. Sin servicio conserva perfiles públicos guardados con disponibilidad sin verificar; si no hay perfiles guardados muestra ejemplos identificados. En ambos casos desactiva reservas reales. `localStorage` conserva perfiles, comprobantes privados, solicitudes pendientes y ejemplos; no determina cupos, asistencia, puntos ni confirmaciones.
 
-El diagnóstico actual y los pasos para configurar el entorno están en [DIAGNOSTICO_2026-11-17.md](../docs/DIAGNOSTICO_2026-11-17.md). Durante ese diagnóstico no se aplicaron migraciones ni se escribieron datos en Supabase real. El filtro de suscripción descrito aquí refleja el código legado; no representa el nuevo plan de alta gratuita y bonos opcionales.
+El diagnóstico inicial y los pasos para configurar el entorno están en [DIAGNOSTICO_2026-11-17.md](../docs/DIAGNOSTICO_2026-11-17.md). Ese informe se redactó antes de instalar desarrollo; la verificación posterior está documentada en el informe de integración. El filtro de suscripción descrito aquí refleja el código legado; no representa el nuevo plan de alta gratuita y bonos opcionales.
 
 ## Base de datos
 
@@ -20,6 +20,8 @@ Primero probar en un proyecto Supabase de desarrollo y respaldar la base existen
 - No puede reconstruir contactos o zonas históricas ya sobrescritos. Conserva el mejor snapshot disponible; las nuevas reservas guardan el suyo.
 
 El panel autorizado todavía está pendiente. No crear políticas amplias para `authenticated` como atajo: cada cuenta necesita membresía explícita del restaurante para administrar sus datos.
+
+En MesaLista-Desarrollo, la clave del servidor puede ejecutar los RPC, pero carece de acceso directo a tablas. `BYPASSRLS` no concede privilegios de tabla por sí solo. La carga inicial de restaurantes se hizo con `postgres` desde el SQL Editor; las reservas y sus comprobaciones posteriores utilizaron los RPC sin ampliar permisos.
 
 ## Variables privadas del servidor
 
@@ -76,7 +78,7 @@ pnpm test:database
 pnpm test:browser
 ```
 
-Las pruebas de base y navegador crean PostgreSQL real en un directorio temporal, replican roles Supabase y destruyen la base al terminar. No usan credenciales externas. El puente HTTP reproduce RPC, pero falta comprobar el gateway real Supabase.
+Las pruebas de base y navegador crean PostgreSQL real en un directorio temporal, replican roles Supabase y destruyen la base al terminar. No usan credenciales externas. El puente HTTP reproduce RPC; adicionalmente se completó una verificación independiente contra el gateway real de MesaLista-Desarrollo, documentada en el informe de integración.
 
 Las carreras usan conexiones distintas esperando locks reales: última mesa, retry idéntico, clave entre restaurantes, bloqueo contra reserva y cancelación que vence mientras espera. Navegador verifica creación, política, cancelación, respuestas perdidas, búsquedas atrasadas, varias pestañas y móvil.
 

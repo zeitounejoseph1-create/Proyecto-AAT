@@ -2,6 +2,8 @@
 
 12 de noviembre de 2026. Base revisada: `main`, commit `2a97adf`.
 
+**Actualización del 17 de noviembre:** el flujo de reservas y concurrencia pasó contra Supabase de desarrollo y se repitieron las 45 pruebas locales con éxito. La evidencia actual y los pendientes de cierre están en [INTEGRACION_DESARROLLO_2026-11-17.md](INTEGRACION_DESARROLLO_2026-11-17.md). Este documento conserva la entrega inicial del 12 de noviembre.
+
 ## Lo que ya existía
 
 - Página con buscador, perfiles/menús, ubicación y editor local de restaurantes y horarios.

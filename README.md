@@ -15,6 +15,8 @@ Abrir `http://127.0.0.1:3000`. Sin credenciales conserva los perfiles guardados 
 
 El [diagnóstico del 17 de noviembre](docs/DIAGNOSTICO_2026-11-17.md) explica las variables, el catálogo filtrado, los permisos de Vercel y lo que falta verificar. `pnpm diagnose:local` y `pnpm diagnose:public` hacen únicamente consultas GET y no imprimen secretos. El primero devuelve código de salida 2 si el servicio local no está configurado.
 
+La [verificación real en Supabase de desarrollo](docs/INTEGRACION_DESARROLLO_2026-11-17.md) completó disponibilidad, reserva guardada, comprobante, cancelación y cupo liberado, incluido el rechazo de solicitudes duplicadas para la misma mesa y horario. Las 45 pruebas locales pasaron nuevamente. El cierre de Etapa 1 sigue pendiente de Vercel y del diagnóstico del catálogo publicado; no se desplegó esta rama.
+
 ## Estructura
 
 | Archivo | Responsabilidad |
