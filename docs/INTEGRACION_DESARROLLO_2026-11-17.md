@@ -1,5 +1,7 @@
 # MesaLista — integración real en desarrollo
 
+**Actualización posterior:** los logs de Vercel permitieron identificar y corregir el bloqueo de instalación. El empaquetado oficial pasó localmente; la Preview remota sigue pendiente de autorización. Ver [la corrección de instalación](CORRECCION_INSTALACION_VERCEL_2026-11-17.md). Este informe conserva la evidencia de Supabase y el estado de Vercel durante esa prueba.
+
 17 de noviembre de 2026. Solo Etapa 1, rama `codex/etapa-1-diagnostico-20261117`. El bloque de reservas contra Supabase de desarrollo está verificado; el cierre de la etapa continúa pendiente de Vercel y de los diagnósticos de la publicación descritos más abajo.
 
 ## Entorno y alcance

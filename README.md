@@ -4,7 +4,7 @@ Reservas para restaurantes en México. Continúa la aplicación existente con HT
 
 ## Desarrollo
 
-Node 22 o posterior y pnpm 11.25.0.
+Node 24.x y pnpm 11.25.0.
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts
@@ -36,5 +36,11 @@ pnpm test:all
 ```
 
 GitHub Actions ejecuta API, PostgreSQL y navegador con datos temporales, sin secretos Supabase. Localmente también admite Chrome instalado con `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+
+## Instalación de Vercel
+
+`vercel.json` utiliza `pnpm install --prod --frozen-lockfile`. La API usa módulos de Node y HTTP hacia Supabase; `embedded-postgres`, `pg` y `playwright` se conservan como herramientas de pruebas en `devDependencies` y quedan fuera de la instalación de despliegue. No se autorizaron scripts adicionales de dependencias ni se desactivó la política estricta de pnpm.
+
+`pnpm verify:production` repite esa instalación en un directorio limpio sin secretos, comprueba que el lockfile no cambie y ejecuta los 20 casos de la API sin los paquetes de pruebas instalados. CI ejecuta esta comprobación además de las 45 pruebas existentes. La [corrección de instalación y sus límites de verificación](docs/CORRECCION_INSTALACION_VERCEL_2026-11-17.md) detalla el error reproducido, el empaquetado oficial y los pasos para una futura Preview.
 
 La [entrega de etapa 1](docs/ETAPA_1.md) detalla mejoras y pendientes. El editor de ejemplos sigue siendo local; cuentas, panel autorizado, pagos, recompensas y notificaciones no están activados.

@@ -1,4 +1,5 @@
 {
+  "installCommand": "pnpm install --prod --frozen-lockfile",
   "headers": [
     {
       "source": "/(.*)",

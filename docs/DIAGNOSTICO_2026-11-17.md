@@ -2,6 +2,8 @@
 
 **Actualización posterior del mismo día:** se configuró e instaló MesaLista-Desarrollo y pasó el flujo real de reservas, cancelaciones y concurrencia, junto con las 45 pruebas locales. Ver [la evidencia actual](INTEGRACION_DESARROLLO_2026-11-17.md). El resto de este documento conserva el diagnóstico inicial y sus resultados históricos; los bloqueos de configuración de desarrollo descritos abajo ya quedaron resueltos. Vercel y los conteos privados del catálogo publicado siguen pendientes.
 
+**Actualización de Vercel:** los logs aportados posteriormente identificaron `ERR_PNPM_IGNORED_BUILDS` por una herramienta de pruebas. La instalación se corrigió y el empaquetado oficial pasó localmente; falta validarlo en una Preview autorizada. Ver [la corrección y sus verificaciones](CORRECCION_INSTALACION_VERCEL_2026-11-17.md). Las referencias posteriores a causa desconocida describen el diagnóstico inicial.
+
 17 de noviembre de 2026. Trabajo local en `codex/etapa-1-diagnostico-20261117`, sobre `636b6ef`. No se inició Etapa 2, no se hizo push ni despliegue y no se modificó Supabase real.
 
 El respaldo `backup/mesalista-trabajo-en-curso-20261117` permanece en `8a497bf5533c17ea2bdbbb5e7234579d2534d61c`. Contiene el trabajo de panel y rediseño separado anteriormente.

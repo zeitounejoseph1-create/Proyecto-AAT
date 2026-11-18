@@ -4,7 +4,7 @@
   "private": true,
   "description": "Reservaciones de restaurantes con Supabase y Vercel",
   "engines": {
-    "node": ">=22"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "node --env-file-if-exists=.env.local scripts/dev-server.cjs",
@@ -12,6 +12,7 @@
     "test:database": "node --test scripts/verify-database.cjs tests/catalog.test.cjs",
     "test:browser": "node --test tests/browser.test.cjs",
     "test:all": "node --test reservation-api.test.cjs tests/diagnose.test.cjs scripts/verify-database.cjs tests/catalog.test.cjs tests/browser.test.cjs",
+    "verify:production": "node scripts/verify-production-install.cjs",
     "diagnose:local": "node --env-file-if-exists=.env.local scripts/diagnose.cjs local",
     "diagnose:public": "node scripts/diagnose.cjs public"
   },
