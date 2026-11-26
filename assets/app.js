@@ -8,8 +8,8 @@
   const money = value => value == null ? 'Precio por consultar' : new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(value) + ' MXN';
   const formatTime = value => /^\d{2}:\d{2}/.test(value || '') ? new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'UTC' }).format(new Date('2000-01-01T' + value.slice(0, 5) + ':00Z')) : 'Sin horario';
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const normalized = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
-  const state = { mode: 'loading', restaurants: [], reservations: [], tokens: [], pending: null, recoveryMessage: '', reservationRevisions: new Map(), availability: new Map(), generation: 0, loading: false, failed: false, submitting: false, bookingView: 'upcoming', coords: null };
+  const normalized = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const state = { mode: 'loading', restaurants: [], reservations: [], tokens: [], pending: null, recoveryMessage: '', reservationRevisions: new Map(), availability: new Map(), preferredTime: '13:00', generation: 0, loading: false, failed: false, submitting: false, bookingView: 'upcoming', coords: null };
 
   function node(tag, text, className) {
     const item = document.createElement(tag);
@@ -109,14 +109,43 @@
     $('cuisine').replaceChildren(option('', 'Todas'), ...[...new Set(state.restaurants.map(r => r.cuisine))].sort().map(c => option(c, c)));
     if ([...$('cuisine').options].some(o => o.value === selected)) $('cuisine').value = selected;
   }
+  function noMatchMessage(f) {
+    if (!state.restaurants.length) return 'Todavía no hay restaurantes publicados en el catálogo.';
+    if (f.q && !state.restaurants.some(r => normalized(r.name).includes(f.q))) return 'No encontramos restaurantes publicados con ese nombre. Elige una sugerencia o borra el nombre para ver el catálogo.';
+    return 'No hay restaurantes que coincidan con el tipo o precio seleccionados. Ajusta esos filtros.';
+  }
+  function updateTimeSelector(f, candidates) {
+    // Retain a preference, never a cached claim of availability. Only fresh matching RPC rows create options.
+    if (f.time) state.preferredTime = f.time;
+    const times = new Set();
+    if (state.mode === 'online' && !state.loading) {
+      for (const restaurant of candidates) {
+        const result = state.availability.get(restaurant.id);
+        if (result?.date === f.date && result.party === f.party) result.slots.forEach(slot => times.add(slot.slot.slice(0, 5)));
+      }
+    }
+    $('time').replaceChildren(...[...times].sort().map(time => option(time, formatTime(time))));
+    if (times.has(state.preferredTime)) $('time').value = state.preferredTime;
+    if (times.size) state.preferredTime = $('time').value;
+    $('time').disabled = !times.size;
+    $('timeStatus').textContent = state.mode === 'loading' ? 'Conectando con el servicio de reservas…'
+      : state.mode !== 'online' ? 'Reconecta el servicio para consultar horarios reales.'
+      : state.loading ? 'Consultando horarios reales…'
+      : !candidates.length ? 'No hay restaurantes que coincidan con la búsqueda.'
+      : times.size ? 'Horarios consultados en el servidor para los restaurantes que coinciden.'
+      : state.failed ? 'No se pudo verificar la disponibilidad. Vuelve a buscar.'
+      : 'Sin mesas para esa fecha y número de personas.';
+  }
   function render() {
     const f = filters();
     const candidates = state.restaurants.filter(r => matches(r, f));
+    updateTimeSelector(f, candidates);
+    f.time = $('time').value;
     const list = state.mode === 'online' ? candidates.filter(r => hasSlot(r, f)) : candidates;
     $('results').replaceChildren();
     if (state.mode === 'loading') { $('status').textContent = 'Conectando con el servicio de reservas…'; return; }
     if (state.loading) { $('status').textContent = 'Consultando disponibilidad en el servidor…'; return; }
-    $('status').textContent = state.mode === 'online' ? (state.failed ? 'No pudimos consultar todos los horarios. Vuelve a buscar. ' : '') + (list.length + ' restaurante(s) con disponibilidad consultada para ' + f.party + ' personas' + (f.time ? ' a las ' + formatTime(f.time) : '') + '.') : (state.restaurants.some(r => !r.demo) ? 'Perfiles guardados. Su publicación y disponibilidad están pendientes de verificar con el servidor.' : 'Catálogo de ejemplo. No representa disponibilidad ni restaurantes publicados.');
+    $('status').textContent = state.mode === 'online' ? (state.failed ? 'No pudimos consultar todos los horarios. Vuelve a buscar. ' : '') + (list.length + ' restaurante(s) con disponibilidad consultada para ' + f.party + ' personas' + (f.time ? ' a las ' + formatTime(f.time) : '') + '.') + (!candidates.length ? ' ' + noMatchMessage(f) : '') : (state.restaurants.some(r => !r.demo) ? 'Perfiles guardados. Su publicación y disponibilidad están pendientes de verificar con el servidor.' : 'Catálogo de ejemplo. No representa disponibilidad ni restaurantes publicados.');
     for (const restaurant of list) {
       const card = node('article', null, 'card');
       card.append(photo(restaurant.img, restaurant.demo ? 'Fotografía ilustrativa' : restaurant.name));
@@ -128,7 +157,7 @@
       footer.append(node('span', restaurant.demo || state.mode !== 'online' ? 'Disponibilidad sin verificar' : formatTime(f.time)), button(restaurant.demo ? 'Ver ejemplo' : state.mode === 'online' ? 'Ver y reservar' : 'Ver perfil guardado', () => show(restaurant.id), 'btn primary'));
       pad.append(footer); card.append(pad); $('results').append(card);
     }
-    if (!list.length) $('results').append(node('p', state.mode === 'online' ? 'No hay mesas con esos criterios. Cambia la fecha, hora o personas.' : 'No hay perfiles con esos criterios.'));
+    if (!list.length) $('results').append(node('p', state.mode === 'online' ? (!candidates.length ? noMatchMessage(f) : state.failed ? 'No se pudo verificar la disponibilidad. Vuelve a buscar.' : 'No hay mesas con esos criterios. Cambia la fecha, hora o personas.') : 'No hay perfiles con esos criterios.'));
   }
 
   let searchTimer;
@@ -148,14 +177,10 @@
       } catch { return { id: restaurant.id, error: true, slots: [] }; }
     }));
     if (generation !== state.generation) return;
-    const times = new Set();
     for (const result of results) {
       state.failed ||= !!result.error;
       state.availability.set(result.id, { date: f.date, party: f.party, slots: result.slots });
-      result.slots.forEach(slot => times.add(String(slot.slot).slice(0, 5)));
     }
-    $('time').replaceChildren(...[...times].sort().map(time => option(time, formatTime(time))));
-    if (times.has(f.time)) $('time').value = f.time;
     state.loading = false;
     render();
   }
@@ -374,7 +399,7 @@
   $('date').min = today; $('date').value = today;
   $('guests').replaceChildren(...Array.from({ length: 30 }, (_, i) => option(i + 1, (i + 1) + (i ? ' personas' : ' persona')))); $('guests').value = '2';
   $('price').replaceChildren(option('', 'Todos los precios'), ...[200, 400, 600, 800, 1000, 1500].map(amount => option(amount, 'Hasta ' + money(amount))));
-  $('time').replaceChildren(...times.map(t => option(t, formatTime(t)))); $('time').value = '13:00';
+  $('time').replaceChildren(); $('time').disabled = true;
   $('searchForm').addEventListener('submit', event => { event.preventDefault(); scheduleSearch(); location.hash = 'buscar'; });
   for (const id of ['guests', 'date', 'cuisine', 'price']) $(id).addEventListener('change', scheduleSearch);
   $('time').addEventListener('change', render);
