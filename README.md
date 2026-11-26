@@ -44,3 +44,41 @@ GitHub Actions ejecuta API, PostgreSQL y navegador con datos temporales, sin sec
 `pnpm verify:production` verifica en un directorio limpio la instalación general y la instalación predeterminada del paquete de la API, conserva ambos lockfiles y ejecuta los 20 casos de la API sin herramientas de pruebas instaladas. CI ejecuta esta comprobación además de las 45 pruebas existentes. La [corrección para el instalador nativo](docs/CORRECCION_API_NATIVA_VERCEL_2026-11-18.md) explica por qué el comando general no bastaba.
 
 La [entrega de etapa 1](docs/ETAPA_1.md) detalla mejoras y pendientes. El editor de ejemplos sigue siendo local; cuentas, panel autorizado, pagos, recompensas y notificaciones no están activados.
+
+
+
+## Decisiones de diseño vs. sugerencias del IS
+
+### 1. Seguridad de las reservaciones
+
+- Propuesta del IS:Codex recomendó eliminar la recopilación insegura de tarjetas.
+- Mi decisión:Aceptè la recomendación de Codex.
+- Motivo:Prefiero proteger los datos bancarios de los clientes antes que implementar un sistema de penalizaciones que no sea seguro.
+- Evidencia: commit 2a97adf.
+
+### 2. Corrección de búsqueda y horarios
+
+- Propuesta del IS:Codex propuso eliminar el ejemplo incorrecto de Trattoria Roma y mostrar únicamente los horarios disponibles consultados en el servidor.
+- Mi decisión:Pedí corregir el error que encontré al probar mi aplicación y después comprobé que la búsqueda funcionara.
+- Motivo:Quiero que los clientes puedan encontrar restaurantes y horarios disponibles sin recibir información incorrecta ni tener problemas al reservar.
+- Evidencia: commit 86205a2.
+
+## Verificación final del producto
+
+Fecha: 26 de noviembre de 2026.
+
+Pruebas manuales:
+- Búsqueda y disponibilidad para 2 personas a la 1:00 p.m.
+- Consulta del menú con 4 productos, precios y horarios.
+
+Pruebas automatizadas reportadas por Codex:
+- 80/80 pruebas locales aprobadas.
+- 51/51 pruebas de GitHub CI aprobadas.
+- 18 comprobaciones en producción aprobadas.
+
+Las pruebas manuales se realizaron con el restaurante
+de demostración, sin confirmar una reservación.
+
+## Aplicación desplegada
+
+https://proyecto-aat.vercel.app/
